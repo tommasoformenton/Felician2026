@@ -1009,12 +1009,104 @@
       <div><span class="it">Al</span><span class="en">At</span> <strong>check-in</strong> <span class="it">il Group Leader firma il modulo di ispezione entro 24h dall'arrivo. Consegnare tutta la documentazione medica all'arrivo.</span><span class="en">the Group Leader signs the room inspection form within 24h of arrival. All medical documentation must be handed in upon arrival.</span></div>
     </div>
 
-    <div class="section-title">🌤️ <span class="it">Meteo New York</span><span class="en">New York Weather</span></div>
+    <div class="section-title">🌤️ <span class="it">Meteo</span><span class="en">Weather</span></div>
     <div class="card" id="weather-card">
-      <div class="card-title"><div class="icon" style="background:#e3f2fd">🌡️</div> <span class="it">Condizioni attuali · New York, NY</span><span class="en">Current conditions · New York, NY</span></div>
-      <div id="weather-body" style="font-size:13px;line-height:1.9;padding-top:4px">
-        <span style="color:var(--text-muted)"><span class="it">Caricamento meteo…</span><span class="en">Loading weather…</span></span>
+      <div class="card-title"><div class="icon" style="background:#e3f2fd">🌡️</div> <span class="it">Condizioni attuali</span><span class="en">Current conditions</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+        <div id="weather-body-nyc" style="font-size:12px;line-height:1.7;padding:8px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+          <div style="font-weight:700;font-size:11px;color:var(--text-muted);margin-bottom:4px">🗽 NEW YORK, NY</div>
+          <span style="color:var(--text-muted)"><span class="it">Caricamento…</span><span class="en">Loading…</span></span>
+        </div>
+        <div id="weather-body-rut" style="font-size:12px;line-height:1.7;padding:8px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+          <div style="font-weight:700;font-size:11px;color:var(--text-muted);margin-bottom:4px">🏫 RUTHERFORD, NJ</div>
+          <span style="color:var(--text-muted)"><span class="it">Caricamento…</span><span class="en">Loading…</span></span>
+        </div>
       </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:6px;text-align:right">
+        <a href="#" onclick="loadWeather();return false" style="color:var(--blue);text-decoration:none">↻ <span class="it">Aggiorna</span><span class="en">Refresh</span></a>
+      </div>
+    </div>
+
+
+    <div class="section-title">📅 <span class="it">Programma di Oggi</span><span class="en">Today's Program</span></div>
+    <div class="card" id="today-card">
+      <div class="card-title"><div class="icon" style="background:#eafaf1">🗓️</div> <span id="today-date-label">—</span></div>
+      <div id="today-body" style="font-size:13px;line-height:1.9;padding-top:4px">
+        <span style="color:var(--text-muted)">—</span>
+      </div>
+    </div>
+
+    <div class="section-title">🚌 <span class="it">Trasporti Pubblici NJ</span><span class="en">NJ Public Transport</span></div>
+    <div class="card">
+      <div class="card-title"><div class="icon" style="background:#e8f0fc">🚌</div> <span class="it">Bus verso New York City</span><span class="en">Bus to New York City</span></div>
+      <p style="font-size:13px;line-height:1.8">
+        <strong><span class="it">Linea</span><span class="en">Line</span> 190</strong> — <span class="it">Rutherford → Port Authority Bus Terminal, NYC</span><span class="en">Rutherford → Port Authority Bus Terminal, NYC</span><br>
+        💵 <strong>$5.45</strong> <span class="it">a tratta (contanti o SmarTrip card)</span><span class="en">per trip (cash or SmarTrip card)</span><br>
+        🕐 <span class="it">Fermata più vicina: </span><span class="en">Nearest stop: </span><strong>Rutherford Ave / Park Ave</strong><br>
+        🗽 <span class="it">Arrivo: </span><span class="en">Arrival: </span><strong>Port Authority, 42nd St, Manhattan</strong>
+      </p>
+      <div class="pill-row">
+        <span class="pill blue"><span class="it">~35 min per NYC</span><span class="en">~35 min to NYC</span></span>
+        <span class="pill green"><span class="it">Servizio frequente</span><span class="en">Frequent service</span></span>
+        <span class="pill gold"><span class="it">Solo con supervisore</span><span class="en">Supervised only</span></span>
+      </div>
+    </div>
+
+    <div class="section-title">🏪 <span class="it">Negozi Locali</span><span class="en">Local Shops</span></div>
+    <div class="card">
+      <div class="card-title"><div class="icon" style="background:#fce4ec">💊</div> <span class="it">Farmacie</span><span class="en">Pharmacies</span></div>
+      <ul class="checklist" style="font-size:12px">
+        <li>
+          <strong>Rutherford Pharmacy</strong> — 62 Park Ave, Rutherford NJ 07070<br>
+          <span class="it">Lun–Ven 10:00–18:00 · Sab 10:00–14:00</span><span class="en">Mon–Fri 10:00–18:00 · Sat 10:00–14:00</span>
+          · <a href="https://maps.google.com/?q=62+Park+Ave+Rutherford+NJ" target="_blank" style="color:var(--blue)">📍 Mappa</a>
+        </li>
+        <li>
+          <strong>CVS Pharmacy</strong> — 572 Paterson Ave, East Rutherford NJ 07073<br>
+          <span class="it">Aperta 7 giorni</span><span class="en">Open 7 days</span>
+          · <a href="https://maps.google.com/?q=572+Paterson+Ave+East+Rutherford+NJ" target="_blank" style="color:var(--blue)">📍 Mappa</a>
+        </li>
+        <li>
+          <strong>West End Pharmacy</strong> — 311 Union Ave, Rutherford NJ 07070
+          · <a href="https://maps.google.com/?q=311+Union+Ave+Rutherford+NJ" target="_blank" style="color:var(--blue)">📍 Mappa</a>
+        </li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon" style="background:#e8f5e9">🛒</div> <span class="it">Supermercati</span><span class="en">Supermarkets</span></div>
+      <ul class="checklist" style="font-size:12px">
+        <li>
+          <strong>ShopRite</strong> — 310 Union Ave, Rutherford NJ 07070<br>
+          <span class="it">Aperto 24h</span><span class="en">Open 24h</span> · (201) 939-7830
+          · <a href="https://maps.google.com/?q=310+Union+Ave+Rutherford+NJ" target="_blank" style="color:var(--blue)">📍 Mappa</a>
+        </li>
+        <li>
+          <strong>Whole Foods Market</strong> — 1 American Dream Way, East Rutherford NJ 07073
+          · <a href="https://maps.google.com/?q=1+American+Dream+Way+East+Rutherford+NJ" target="_blank" style="color:var(--blue)">📍 Mappa</a>
+        </li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon" style="background:#fff8e1">🏦</div> <span class="it">Banche &amp; ATM</span><span class="en">Banks &amp; ATM</span></div>
+      <ul class="checklist" style="font-size:12px">
+        <li>
+          <strong>Chase Bank</strong> — 24 Park Ave, Rutherford NJ 07070
+          · <a href="https://maps.google.com/?q=24+Park+Ave+Rutherford+NJ" target="_blank" style="color:var(--blue)">📍 Mappa</a>
+        </li>
+        <li>
+          <strong>BCB Bank</strong> — 190 Park Ave, Rutherford NJ 07070
+          · <a href="https://maps.google.com/?q=190+Park+Ave+Rutherford+NJ" target="_blank" style="color:var(--blue)">📍 Mappa</a>
+        </li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon" style="background:#f3e5f5">🚬</div> <span class="it">Tabaccherie</span><span class="en">Tobacco Shops</span></div>
+      <ul class="checklist" style="font-size:12px">
+        <li>
+          <strong>Tobacco Shop</strong> — 71 Park Ave, Rutherford NJ 07070 · (201) 267-6301
+          · <a href="https://maps.google.com/?q=71+Park+Ave+Rutherford+NJ" target="_blank" style="color:var(--blue)">📍 Mappa</a>
+        </li>
+      </ul>
     </div>
 
   </div>
@@ -1891,6 +1983,7 @@
         <li><span class="it">Lenzuola, federe, cuscino, coperta, asciugamani inclusi</span><span class="en">Bed sheets, pillowcases, pillow, blanket, towels included</span></li>
         <li><span class="it">Cambio lenzuola a metà programma</span><span class="en">Linen change at the halfway point of the programme</span></li>
         <li><span class="it">Pulizia aree comuni una volta a settimana</span><span class="en">Common areas cleaned once a week</span></li>
+        <li><span class="it">⚠️ Perdita chiave stanza = multa <strong>$50</strong> addebitata da Felician University</span><span class="en">⚠️ Lost room key = <strong>$50</strong> fine charged by Felician University</span></li>
       </ul>
     </div>
 
@@ -3261,47 +3354,145 @@
     353:'🌦️',356:'🌧️',359:'🌧️',362:'🌨️',365:'🌨️',368:'🌨️',371:'❄️',
     374:'🌨️',377:'🌨️',386:'⛈️',389:'⛈️',392:'⛈️',395:'⛈️'
   };
+  function renderWeatherBox(el, d) {
+    const c = d.current_condition[0];
+    const icon = WX_ICONS[parseInt(c.weatherCode)] || '🌡️';
+    const today = d.weather[0];
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+        <span style="font-size:28px">${icon}</span>
+        <div>
+          <div style="font-size:18px;font-weight:700">${c.temp_C}°C <span style="font-size:11px;color:var(--text-muted)">(${c.temp_F}°F)</span></div>
+          <div style="font-size:11px;color:var(--text-muted)">${c.weatherDesc[0].value}</div>
+        </div>
+      </div>
+      <div style="font-size:11px;display:grid;grid-template-columns:1fr 1fr;gap:2px">
+        <span>💧 ${c.humidity}%</span>
+        <span>💨 ${c.windspeedKmph} km/h</span>
+        <span>↓${today.mintempC}° ↑${today.maxtempC}°C</span>
+        <span>🌡️ ${c.FeelsLikeC}°C</span>
+      </div>`;
+  }
   async function loadWeather() {
-    const el = document.getElementById('weather-body');
-    if (!el) return;
+    const elNyc = document.getElementById('weather-body-nyc');
+    const elRut = document.getElementById('weather-body-rut');
+    if (!elNyc || !elRut) return;
     try {
-      const r = await fetch('https://wttr.in/New+York?format=j1');
-      const d = await r.json();
-      const c = d.current_condition[0];
-      const icon = WX_ICONS[parseInt(c.weatherCode)] || '🌡️';
-      const tempC = c.temp_C;
-      const tempF = c.temp_F;
-      const feelsC = c.FeelsLikeC;
-      const hum = c.humidity;
-      const wind = c.windspeedKmph;
-      const desc = c.lang_it ? c.lang_it[0].value : c.weatherDesc[0].value;
-      const today = d.weather[0];
-      const maxC = today.maxtempC, minC = today.mintempC;
-      const isIt = document.documentElement.lang !== 'en';
-      el.innerHTML = `
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-          <span style="font-size:36px">${icon}</span>
-          <div>
-            <div style="font-size:22px;font-weight:700">${tempC}°C <span style="font-size:13px;color:var(--text-muted)">(${tempF}°F)</span></div>
-            <div style="font-size:13px;color:var(--text-muted)">${desc}</div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:12px">
-          <span>🌡️ <span class="it">Percepito</span><span class="en">Feels like</span>: <strong>${feelsC}°C</strong></span>
-          <span>💧 <span class="it">Umidità</span><span class="en">Humidity</span>: <strong>${hum}%</strong></span>
-          <span>💨 <span class="it">Vento</span><span class="en">Wind</span>: <strong>${wind} km/h</strong></span>
-          <span>📊 <span class="it">Min/Max</span><span class="en">Min/Max</span>: <strong>${minC}° / ${maxC}°C</strong></span>
-        </div>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;text-align:right">
-          <span class="it">Aggiornato</span><span class="en">Updated</span>: ${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
-          · <a href="#" onclick="loadWeather();return false" style="color:var(--blue);text-decoration:none">↻</a>
-        </div>`;
+      const [rNyc, rRut] = await Promise.all([
+        fetch('https://wttr.in/New+York?format=j1'),
+        fetch('https://wttr.in/Rutherford+NJ?format=j1')
+      ]);
+      const [dNyc, dRut] = await Promise.all([rNyc.json(), rRut.json()]);
+      const hdr = '<div style="font-weight:700;font-size:11px;color:var(--text-muted);margin-bottom:4px">';
+      elNyc.innerHTML = hdr + '🗽 NEW YORK, NY</div>';
+      elRut.innerHTML = hdr + '🏫 RUTHERFORD, NJ</div>';
+      renderWeatherBox(elNyc, dNyc);
+      renderWeatherBox(elRut, dRut);
+      // re-prepend label
+      elNyc.innerHTML = hdr + '🗽 NEW YORK, NY</div>' + elNyc.innerHTML;
+      elRut.innerHTML = hdr + '🏫 RUTHERFORD, NJ</div>' + elRut.innerHTML;
     } catch(e) {
-      el.innerHTML = '<span style="color:var(--text-muted)"><span class="it">Meteo non disponibile (controlla la connessione)</span><span class="en">Weather unavailable (check connection)</span></span>';
+      [elNyc,elRut].forEach(el => el && (el.innerHTML = '<span style="color:var(--text-muted)">Meteo n/d</span>'));
     }
   }
   document.addEventListener('DOMContentLoaded', loadWeather);
 
 </script>
+
+  <!-- ── SOS button ─────────────────────────────────────────────── -->
+  <a href="tel:+13322751865" id="sos-btn" aria-label="SOS">
+    🆘
+    <span style="font-size:10px;display:block;line-height:1;margin-top:2px">SOS</span>
+  </a>
+  <style>
+    #sos-btn {
+      position: fixed;
+      bottom: 80px;
+      right: 16px;
+      width: 54px;
+      height: 54px;
+      background: #c0392b;
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      text-decoration: none;
+      box-shadow: 0 3px 12px rgba(192,57,43,0.5);
+      z-index: 999;
+      transition: transform .15s;
+    }
+    #sos-btn:active { transform: scale(0.92); }
+  </style>
+
+
+  // ── Today's Program ────────────────────────────────────────────────────────
+  (function() {
+    const TURNI = [
+      { name: 'Turno 1', start: new Date(2026,6,15), end: new Date(2026,6,28) },
+      { name: 'Turno 2', start: new Date(2026,6,23), end: new Date(2026,7,5)  }
+    ];
+    const SCHEDULE = {
+      // key: "dayIndex" (0=arrival, 1=Mon wk1 ...) per turno
+      // giorni settimana: Lu=1,Ma=2,Me=3,Gi=4,Ve=5,Sa=6,Do=0
+    };
+    const DAYS_IT = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+    const DAYS_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const MONTHS_IT = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+    const MONTHS_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    function diffDays(a, b) {
+      return Math.floor((b - a) / 86400000);
+    }
+
+    function todayProgram() {
+      const lbl = document.getElementById('today-date-label');
+      const body = document.getElementById('today-body');
+      if (!lbl || !body) return;
+      const now = new Date();
+      const isIt = document.documentElement.lang !== 'en';
+      const dow = now.getDay();
+      const dayName = isIt ? DAYS_IT[dow] : DAYS_EN[dow];
+      const month = isIt ? MONTHS_IT[now.getMonth()] : MONTHS_EN[now.getMonth()];
+      lbl.textContent = `${dayName} ${now.getDate()} ${month} ${now.getFullYear()}`;
+
+      let activeTurni = TURNI.filter(t => now >= t.start && now <= t.end);
+      if (activeTurni.length === 0) {
+        // before or after program
+        const allPast = TURNI.every(t => now > t.end);
+        const allFuture = TURNI.every(t => now < t.start);
+        body.innerHTML = allFuture
+          ? `<span style="color:var(--text-muted)"><span class="it">Il programma inizia il <strong>15 luglio 2026</strong> 🗓️</span><span class="en">Program starts on <strong>15 July 2026</strong> 🗓️</span></span>`
+          : `<span style="color:var(--text-muted)"><span class="it">Il programma è terminato. Arrivederci! 👋</span><span class="en">Program has ended. Goodbye! 👋</span></span>`;
+        return;
+      }
+
+      let html = '';
+      activeTurni.forEach(turno => {
+        const dayN = diffDays(turno.start, now) + 1;
+        const isWeekend = (dow === 0 || dow === 6);
+        const isLesson = (dow >= 1 && dow <= 5);
+        html += `<div style="margin-bottom:10px">
+          <div style="font-weight:700;color:var(--blue);margin-bottom:4px">📌 ${turno.name} — <span class="it">Giorno</span><span class="en">Day</span> ${dayN}</div>
+          <div style="display:grid;gap:3px;font-size:12px">`;
+        if (isLesson) {
+          html += `<div>🎓 <strong>09:00–12:45</strong> <span class="it">Lezioni ESL · pausa 10:30–10:45</span><span class="en">ESL Lessons · break 10:30–10:45</span></div>`;
+          html += `<div>🍽️ <strong>13:00–14:00</strong> <span class="it">Pranzo in mensa</span><span class="en">Lunch in dining hall</span></div>`;
+          html += `<div>🌆 <strong>14:30+</strong> <span class="it">Attività/Escursione — vedi tab Programma</span><span class="en">Activity/Excursion — see Schedule tab</span></div>`;
+          html += `<div>🍴 <strong>19:00+</strong> <span class="it">Cena (fuori o campus)</span><span class="en">Dinner (out or on campus)</span></div>`;
+        } else {
+          html += `<div>🥞 <strong>10:00+</strong> Brunch <span class="it">in mensa</span><span class="en">in dining hall</span></div>`;
+          html += `<div>🌇 <strong>Afternoon</strong> <span class="it">Attività weekend — vedi tab Programma</span><span class="en">Weekend activity — see Schedule tab</span></div>`;
+          html += `<div>🍴 <strong>19:00+</strong> <span class="it">Cena in campus</span><span class="en">Dinner on campus</span></div>`;
+        }
+        html += `</div></div>`;
+      });
+      body.innerHTML = html;
+    }
+    document.addEventListener('DOMContentLoaded', todayProgram);
+  })();
+
 </body>
 </html>
