@@ -2284,6 +2284,9 @@
         <button onclick="closeLightbox()" style="padding:8px 18px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:20px;cursor:pointer;font-size:12px">
           ✕ <span class="it">Chiudi</span><span class="en">Close</span>
         </button>
+        <a id="lightbox-download-btn" href="#" download style="padding:8px 18px;background:#27ae60;color:#fff;border:none;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700;text-decoration:none">
+          ⬇️ <span class="it">Scarica</span><span class="en">Download</span>
+        </a>
         <button id="lightbox-delete-btn" onclick="deleteCurrentPhoto()" style="padding:8px 18px;background:#c0392b;color:#fff;border:none;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700">
           🗑️ <span class="it">Elimina</span><span class="en">Delete</span>
         </button>
@@ -3558,6 +3561,12 @@
     document.getElementById('lightbox-caption').textContent = caption;
     const delBtn = document.getElementById('lightbox-delete-btn');
     if (delBtn) delBtn.style.display = fbKey ? 'inline-block' : 'none';
+    const dlBtn = document.getElementById('lightbox-download-btn');
+    if (dlBtn) {
+      const dlUrl = src.replace('/image/upload/', '/image/upload/fl_attachment/');
+      dlBtn.href = dlUrl;
+      dlBtn.download = caption || 'felician2026.jpg';
+    }
     lb.style.display = 'flex';
     document.body.style.overflow = 'hidden';
   }
