@@ -2235,6 +2235,56 @@
     </div>
   </div>
 
+  <!-- ═══════════════ FOTO ═══════════════ -->
+  <div id="tab-foto" class="tab-content">
+
+    <div class="section-title">📸 <span class="it">Galleria Foto</span><span class="en">Photo Gallery</span></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <label style="display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--crimson);color:#fff;padding:14px 10px;border-radius:14px;cursor:pointer;font-weight:700;font-size:13px;text-align:center;box-shadow:0 3px 10px rgba(139,15,15,.3)">
+        <span style="font-size:26px">📤</span>
+        <span class="it">Carica Foto</span><span class="en">Upload Photo</span>
+        <input type="file" id="photo-input" accept="image/*" multiple style="display:none">
+      </label>
+      <button onclick="openAlbumModal()" style="display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--blue);color:#fff;padding:14px 10px;border-radius:14px;cursor:pointer;font-weight:700;font-size:13px;text-align:center;border:none;box-shadow:0 3px 10px rgba(0,61,31,.2)">
+        <span style="font-size:26px">🗂️</span>
+        <span class="it">Crea Album</span><span class="en">Create Album</span>
+      </button>
+    </div>
+
+    <div id="upload-status" style="text-align:center;font-size:12px;color:var(--text-muted);min-height:18px;margin-bottom:8px"></div>
+
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <span style="font-size:12px;font-weight:600;color:var(--text-muted)"><span class="it">Album:</span><span class="en">Album:</span></span>
+      <div id="album-pills" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    </div>
+
+    <div id="gallery-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px"></div>
+    <div id="gallery-empty" style="text-align:center;padding:40px 16px;color:var(--text-muted);font-size:13px">
+      <div style="font-size:40px;margin-bottom:8px">🖼️</div>
+      <span class="it">Nessuna foto ancora. Sii il primo a condividere!</span>
+      <span class="en">No photos yet. Be the first to share!</span>
+    </div>
+
+    <div id="album-modal" onclick="if(event.target===this)closeAlbumModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1500;align-items:center;justify-content:center">
+      <div style="background:var(--card-bg);border-radius:16px;padding:24px;width:90%;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
+        <div style="font-weight:700;font-size:16px;margin-bottom:16px">🗂️ <span class="it">Nuovo Album</span><span class="en">New Album</span></div>
+        <input id="album-name-input" type="text" placeholder="Es: NYC Day 1, Disco Night…" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:var(--bg);color:var(--text);box-sizing:border-box;margin-bottom:12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button onclick="closeAlbumModal()" style="padding:10px;border:1px solid var(--border);border-radius:8px;background:none;color:var(--text);cursor:pointer;font-size:13px"><span class="it">Annulla</span><span class="en">Cancel</span></button>
+          <button onclick="createAlbum()" style="padding:10px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px"><span class="it">Crea</span><span class="en">Create</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div id="lightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:2000;align-items:center;justify-content:center;flex-direction:column">
+      <img id="lightbox-img" style="max-width:95vw;max-height:82vh;border-radius:8px;object-fit:contain">
+      <div id="lightbox-caption" style="color:#fff;font-size:12px;margin-top:8px;opacity:.7;max-width:90vw;text-align:center"></div>
+      <div style="color:#fff;font-size:11px;margin-top:4px;opacity:.5"><span class="it">Tocca per chiudere</span><span class="en">Tap to close</span></div>
+    </div>
+
+  </div>
+
 
   <div id="tab-segnala" class="tab-content">
     <div class="hero" style="margin-bottom:20px">
@@ -3398,16 +3448,66 @@
   }
   document.addEventListener('DOMContentLoaded', loadWeather);
 
-  // ── Gallery (Cloudinary + localStorage) ────────────────────────────────────
-  const CLD_CLOUD  = 'dix4fxpih';
-  const CLD_PRESET = 'felician2026';
-  const LS_KEY     = 'felician2026_photos';
+  // ── Gallery (Cloudinary + localStorage + Albums) ────────────────────────────
+  const CLD_CLOUD   = 'dix4fxpih';
+  const CLD_PRESET  = 'felician2026';
+  const LS_PHOTOS   = 'felician2026_photos';
+  const LS_ALBUMS   = 'felician2026_albums';
+  let   currentAlbum = 'all';
 
-  function savePhotoLocally(url, thumb) {
-    const stored = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+  // ── Album helpers ────────────────────────────────────────────────────────────
+  function getAlbums() { return JSON.parse(localStorage.getItem(LS_ALBUMS) || '[]'); }
+  function saveAlbums(a) { localStorage.setItem(LS_ALBUMS, JSON.stringify(a)); }
+
+  function openAlbumModal() {
+    document.getElementById('album-modal').style.display = 'flex';
+    document.getElementById('album-name-input').value = '';
+    setTimeout(() => document.getElementById('album-name-input').focus(), 100);
+  }
+  function closeAlbumModal() { document.getElementById('album-modal').style.display = 'none'; }
+
+  function createAlbum() {
+    const name = document.getElementById('album-name-input').value.trim();
+    if (!name) return;
+    const albums = getAlbums();
+    const id = 'album_' + Date.now();
+    albums.push({ id, name });
+    saveAlbums(albums);
+    closeAlbumModal();
+    renderAlbumPills();
+    selectAlbum(id, null);
+  }
+
+  function renderAlbumPills() {
+    const container = document.getElementById('album-pills');
+    if (!container) return;
+    const albums = getAlbums();
+    const isIt = document.documentElement.lang !== 'en';
+    container.innerHTML = `<button class="album-pill${currentAlbum==='all'?' active':''}" data-album="all" onclick="selectAlbum('all',this)">${isIt?'Tutte':'All'}</button>`;
+    albums.forEach(a => {
+      const btn = document.createElement('button');
+      btn.className = 'album-pill' + (currentAlbum === a.id ? ' active' : '');
+      btn.dataset.album = a.id;
+      btn.textContent = a.name;
+      btn.onclick = () => selectAlbum(a.id, btn);
+      container.appendChild(btn);
+    });
+  }
+
+  function selectAlbum(id, btn) {
+    currentAlbum = id;
+    document.querySelectorAll('.album-pill').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    else { const b = document.querySelector(`[data-album="${id}"]`); if(b) b.classList.add('active'); }
+    loadGallery();
+  }
+
+  // ── Photo helpers ────────────────────────────────────────────────────────────
+  function savePhotoLocally(url, thumb, albumId) {
+    const stored = JSON.parse(localStorage.getItem(LS_PHOTOS) || '[]');
     if (!stored.find(p => p.url === url)) {
-      stored.push({ url, thumb, ts: Date.now() });
-      localStorage.setItem(LS_KEY, JSON.stringify(stored));
+      stored.push({ url, thumb, album: albumId || 'all', ts: Date.now() });
+      localStorage.setItem(LS_PHOTOS, JSON.stringify(stored));
     }
   }
 
@@ -3415,7 +3515,8 @@
     const grid  = document.getElementById('gallery-grid');
     const empty = document.getElementById('gallery-empty');
     if (!grid) return;
-    const stored = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+    let stored = JSON.parse(localStorage.getItem(LS_PHOTOS) || '[]');
+    if (currentAlbum !== 'all') stored = stored.filter(p => p.album === currentAlbum);
     if (stored.length === 0) { empty.style.display = 'block'; grid.innerHTML = ''; return; }
     empty.style.display = 'none';
     grid.innerHTML = '';
@@ -3425,9 +3526,8 @@
   function addThumb(grid, thumb, full, caption) {
     const div = document.createElement('div');
     div.style.cssText = 'aspect-ratio:1;overflow:hidden;border-radius:4px;cursor:pointer;background:var(--border)';
-    const safeCaption = caption.replace(/'/g, "\'");
-    const safeFull = full.replace(/'/g, "\'");
-    div.innerHTML = `<img src="${thumb}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onclick="openLightbox('${safeFull}','${safeCaption}')" onerror="this.parentElement.style.display='none'">`;
+    div.innerHTML = `<img src="${thumb}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.display='none'">`;
+    div.querySelector('img').addEventListener('click', () => openLightbox(full, caption));
     grid.appendChild(div);
   }
 
@@ -3444,6 +3544,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    renderAlbumPills();
     loadGallery();
 
     const input  = document.getElementById('photo-input');
@@ -3468,7 +3569,7 @@
             const d = await r.json();
             const thumb = `https://res.cloudinary.com/${CLD_CLOUD}/image/upload/w_300,h_300,c_fill,q_auto/${d.public_id}.${d.format}`;
             const full  = `https://res.cloudinary.com/${CLD_CLOUD}/image/upload/w_1200,q_auto/${d.public_id}.${d.format}`;
-            savePhotoLocally(full, thumb);
+            savePhotoLocally(full, thumb, currentAlbum === 'all' ? null : currentAlbum);
             ok++;
           } else { fail++; }
         } catch { fail++; }
