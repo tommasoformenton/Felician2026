@@ -3398,39 +3398,43 @@
   }
   document.addEventListener('DOMContentLoaded', loadWeather);
 
-  // ── Gallery (Cloudinary) ────────────────────────────────────────────────────
+  // ── Gallery (Cloudinary + localStorage) ────────────────────────────────────
   const CLD_CLOUD  = 'dix4fxpih';
   const CLD_PRESET = 'felician2026';
-  const CLD_LIST   = `https://res.cloudinary.com/${CLD_CLOUD}/image/list/felician2026.json`;
+  const LS_KEY     = 'felician2026_photos';
 
-  async function loadGallery() {
+  function savePhotoLocally(url, thumb) {
+    const stored = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+    if (!stored.find(p => p.url === url)) {
+      stored.push({ url, thumb, ts: Date.now() });
+      localStorage.setItem(LS_KEY, JSON.stringify(stored));
+    }
+  }
+
+  function loadGallery() {
     const grid  = document.getElementById('gallery-grid');
     const empty = document.getElementById('gallery-empty');
     if (!grid) return;
-    try {
-      const r = await fetch(CLD_LIST + '?t=' + Date.now());
-      const d = await r.json();
-      const resources = (d.resources || []).reverse();
-      if (resources.length === 0) { empty.style.display='block'; return; }
-      empty.style.display = 'none';
-      grid.innerHTML = '';
-      resources.forEach(res => {
-        const thumb = `https://res.cloudinary.com/${CLD_CLOUD}/image/upload/w_300,h_300,c_fill,q_auto/${res.public_id}.${res.format}`;
-        const full  = `https://res.cloudinary.com/${CLD_CLOUD}/image/upload/w_1200,q_auto/${res.public_id}.${res.format}`;
-        const div = document.createElement('div');
-        div.style.cssText = 'aspect-ratio:1;overflow:hidden;border-radius:4px;cursor:pointer;background:var(--border)';
-        div.innerHTML = `<img src="${thumb}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onclick="openLightbox('${full}','${res.public_id}')" onerror="this.parentElement.style.display='none'">`;
-        grid.appendChild(div);
-      });
-    } catch(e) {
-      empty.style.display = 'block';
-    }
+    const stored = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+    if (stored.length === 0) { empty.style.display = 'block'; grid.innerHTML = ''; return; }
+    empty.style.display = 'none';
+    grid.innerHTML = '';
+    [...stored].reverse().forEach(p => addThumb(grid, p.thumb, p.url, p.url.split('/').pop()));
+  }
+
+  function addThumb(grid, thumb, full, caption) {
+    const div = document.createElement('div');
+    div.style.cssText = 'aspect-ratio:1;overflow:hidden;border-radius:4px;cursor:pointer;background:var(--border)';
+    const safeCaption = caption.replace(/'/g, "\'");
+    const safeFull = full.replace(/'/g, "\'");
+    div.innerHTML = `<img src="${thumb}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onclick="openLightbox('${safeFull}','${safeCaption}')" onerror="this.parentElement.style.display='none'">`;
+    grid.appendChild(div);
   }
 
   function openLightbox(src, caption) {
     const lb = document.getElementById('lightbox');
     document.getElementById('lightbox-img').src = src;
-    document.getElementById('lightbox-caption').textContent = caption.split('/').pop();
+    document.getElementById('lightbox-caption').textContent = caption;
     lb.style.display = 'flex';
     document.body.style.overflow = 'hidden';
   }
@@ -3460,15 +3464,21 @@
         status.innerHTML = `⏳ <span class="it">Caricamento ${ok+fail+1}/${files.length}…</span><span class="en">Uploading ${ok+fail+1}/${files.length}…</span>`;
         try {
           const r = await fetch(`https://api.cloudinary.com/v1_1/${CLD_CLOUD}/image/upload`, {method:'POST',body:fd});
-          if (r.ok) ok++; else fail++;
+          if (r.ok) {
+            const d = await r.json();
+            const thumb = `https://res.cloudinary.com/${CLD_CLOUD}/image/upload/w_300,h_300,c_fill,q_auto/${d.public_id}.${d.format}`;
+            const full  = `https://res.cloudinary.com/${CLD_CLOUD}/image/upload/w_1200,q_auto/${d.public_id}.${d.format}`;
+            savePhotoLocally(full, thumb);
+            ok++;
+          } else { fail++; }
         } catch { fail++; }
       }
 
       if (ok > 0) {
         status.innerHTML = `✅ ${ok} <span class="it">foto caricate!</span><span class="en">photos uploaded!</span>`;
-        setTimeout(() => { loadGallery(); status.textContent=''; }, 1500);
+        setTimeout(() => { loadGallery(); status.textContent = ''; }, 1000);
       } else {
-        status.innerHTML = `❌ <span class="it">Errore upload. Riprova.</span><span class="en">Upload error. Try again.</span>`;
+        status.innerHTML = `❌ <span class="it">Errore upload. Controlla la connessione.</span><span class="en">Upload error. Check connection.</span>`;
       }
       input.value = '';
     });
