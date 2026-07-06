@@ -3448,17 +3448,27 @@
   }
   document.addEventListener('DOMContentLoaded', loadWeather);
 
-  // ── Gallery (Cloudinary + localStorage + Albums) ────────────────────────────
-  const CLD_CLOUD   = 'dix4fxpih';
-  const CLD_PRESET  = 'felician2026';
-  const LS_PHOTOS   = 'felician2026_photos';
-  const LS_ALBUMS   = 'felician2026_albums';
+  // ── Gallery (Cloudinary + Firebase Realtime DB) ─────────────────────────────
+  const CLD_CLOUD  = 'dix4fxpih';
+  const CLD_PRESET = 'felician2026';
+  const FB_URL     = 'https://felician2026-c1d93-default-rtdb.firebaseio.com';
   let   currentAlbum = 'all';
 
-  // ── Album helpers ────────────────────────────────────────────────────────────
-  function getAlbums() { return JSON.parse(localStorage.getItem(LS_ALBUMS) || '[]'); }
-  function saveAlbums(a) { localStorage.setItem(LS_ALBUMS, JSON.stringify(a)); }
+  // ── Firebase helpers ─────────────────────────────────────────────────────────
+  async function fbGet(path) {
+    const r = await fetch(`${FB_URL}/${path}.json`);
+    return r.ok ? r.json() : null;
+  }
+  async function fbPush(path, data) {
+    const r = await fetch(`${FB_URL}/${path}.json`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    });
+    return r.ok ? r.json() : null;
+  }
 
+  // ── Album helpers ─────────────────────────────────────────────────────────────
   function openAlbumModal() {
     document.getElementById('album-modal').style.display = 'flex';
     document.getElementById('album-name-input').value = '';
@@ -3466,32 +3476,33 @@
   }
   function closeAlbumModal() { document.getElementById('album-modal').style.display = 'none'; }
 
-  function createAlbum() {
+  async function createAlbum() {
     const name = document.getElementById('album-name-input').value.trim();
     if (!name) return;
-    const albums = getAlbums();
-    const id = 'album_' + Date.now();
-    albums.push({ id, name });
-    saveAlbums(albums);
+    const result = await fbPush('albums', { name, ts: Date.now() });
     closeAlbumModal();
-    renderAlbumPills();
-    selectAlbum(id, null);
+    await renderAlbumPills();
+    if (result) selectAlbum(result.name, null);
   }
 
-  function renderAlbumPills() {
+  async function renderAlbumPills() {
     const container = document.getElementById('album-pills');
     if (!container) return;
-    const albums = getAlbums();
     const isIt = document.documentElement.lang !== 'en';
     container.innerHTML = `<button class="album-pill${currentAlbum==='all'?' active':''}" data-album="all" onclick="selectAlbum('all',this)">${isIt?'Tutte':'All'}</button>`;
-    albums.forEach(a => {
-      const btn = document.createElement('button');
-      btn.className = 'album-pill' + (currentAlbum === a.id ? ' active' : '');
-      btn.dataset.album = a.id;
-      btn.textContent = a.name;
-      btn.onclick = () => selectAlbum(a.id, btn);
-      container.appendChild(btn);
-    });
+    try {
+      const albums = await fbGet('albums');
+      if (albums) {
+        Object.entries(albums).forEach(([id, a]) => {
+          const btn = document.createElement('button');
+          btn.className = 'album-pill' + (currentAlbum === id ? ' active' : '');
+          btn.dataset.album = id;
+          btn.textContent = a.name;
+          btn.onclick = () => selectAlbum(id, btn);
+          container.appendChild(btn);
+        });
+      }
+    } catch(e) {}
   }
 
   function selectAlbum(id, btn) {
@@ -3502,25 +3513,25 @@
     loadGallery();
   }
 
-  // ── Photo helpers ────────────────────────────────────────────────────────────
-  function savePhotoLocally(url, thumb, albumId) {
-    const stored = JSON.parse(localStorage.getItem(LS_PHOTOS) || '[]');
-    if (!stored.find(p => p.url === url)) {
-      stored.push({ url, thumb, album: albumId || 'all', ts: Date.now() });
-      localStorage.setItem(LS_PHOTOS, JSON.stringify(stored));
-    }
-  }
-
-  function loadGallery() {
+  // ── Gallery ──────────────────────────────────────────────────────────────────
+  async function loadGallery() {
     const grid  = document.getElementById('gallery-grid');
     const empty = document.getElementById('gallery-empty');
     if (!grid) return;
-    let stored = JSON.parse(localStorage.getItem(LS_PHOTOS) || '[]');
-    if (currentAlbum !== 'all') stored = stored.filter(p => p.album === currentAlbum);
-    if (stored.length === 0) { empty.style.display = 'block'; grid.innerHTML = ''; return; }
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);font-size:12px">⏳</div>';
     empty.style.display = 'none';
-    grid.innerHTML = '';
-    [...stored].reverse().forEach(p => addThumb(grid, p.thumb, p.url, p.url.split('/').pop()));
+    try {
+      const data = await fbGet('photos');
+      if (!data) { grid.innerHTML=''; empty.style.display='block'; return; }
+      let photos = Object.values(data).sort((a,b) => b.ts - a.ts);
+      if (currentAlbum !== 'all') photos = photos.filter(p => p.album === currentAlbum);
+      if (photos.length === 0) { grid.innerHTML=''; empty.style.display='block'; return; }
+      grid.innerHTML = '';
+      photos.forEach(p => addThumb(grid, p.thumb, p.url, p.caption || ''));
+    } catch(e) {
+      grid.innerHTML='';
+      empty.style.display='block';
+    }
   }
 
   function addThumb(grid, thumb, full, caption) {
@@ -3543,8 +3554,8 @@
     document.body.style.overflow = '';
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    renderAlbumPills();
+  document.addEventListener('DOMContentLoaded', async () => {
+    await renderAlbumPills();
     loadGallery();
 
     const input  = document.getElementById('photo-input');
@@ -3569,7 +3580,11 @@
             const d = await r.json();
             const thumb = `https://res.cloudinary.com/${CLD_CLOUD}/image/upload/w_300,h_300,c_fill,q_auto/${d.public_id}.${d.format}`;
             const full  = `https://res.cloudinary.com/${CLD_CLOUD}/image/upload/w_1200,q_auto/${d.public_id}.${d.format}`;
-            savePhotoLocally(full, thumb, currentAlbum === 'all' ? null : currentAlbum);
+            await fbPush('photos', {
+              url: full, thumb, caption: file.name,
+              album: currentAlbum === 'all' ? null : currentAlbum,
+              ts: Date.now()
+            });
             ok++;
           } else { fail++; }
         } catch { fail++; }
