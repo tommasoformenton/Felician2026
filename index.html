@@ -2277,10 +2277,17 @@
       </div>
     </div>
 
-    <div id="lightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:2000;align-items:center;justify-content:center;flex-direction:column">
-      <img id="lightbox-img" style="max-width:95vw;max-height:82vh;border-radius:8px;object-fit:contain">
+    <div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:2000;align-items:center;justify-content:center;flex-direction:column">
+      <img id="lightbox-img" onclick="closeLightbox()" style="max-width:95vw;max-height:75vh;border-radius:8px;object-fit:contain;cursor:pointer">
       <div id="lightbox-caption" style="color:#fff;font-size:12px;margin-top:8px;opacity:.7;max-width:90vw;text-align:center"></div>
-      <div style="color:#fff;font-size:11px;margin-top:4px;opacity:.5"><span class="it">Tocca per chiudere</span><span class="en">Tap to close</span></div>
+      <div style="display:flex;gap:12px;margin-top:12px;align-items:center">
+        <button onclick="closeLightbox()" style="padding:8px 18px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:20px;cursor:pointer;font-size:12px">
+          ✕ <span class="it">Chiudi</span><span class="en">Close</span>
+        </button>
+        <button id="lightbox-delete-btn" onclick="deleteCurrentPhoto()" style="padding:8px 18px;background:#c0392b;color:#fff;border:none;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700">
+          🗑️ <span class="it">Elimina</span><span class="en">Delete</span>
+        </button>
+      </div>
     </div>
 
   </div>
@@ -3523,35 +3530,55 @@
     try {
       const data = await fbGet('photos');
       if (!data) { grid.innerHTML=''; empty.style.display='block'; return; }
-      let photos = Object.values(data).sort((a,b) => b.ts - a.ts);
+      let photos = Object.entries(data).map(([k,v]) => ({...v, _fbKey:k})).sort((a,b) => b.ts - a.ts);
       if (currentAlbum !== 'all') photos = photos.filter(p => p.album === currentAlbum);
       if (photos.length === 0) { grid.innerHTML=''; empty.style.display='block'; return; }
       grid.innerHTML = '';
-      photos.forEach(p => addThumb(grid, p.thumb, p.url, p.caption || ''));
+      photos.forEach((p, _, arr) => addThumb(grid, p.thumb, p.url, p.caption || '', p._fbKey));
     } catch(e) {
       grid.innerHTML='';
       empty.style.display='block';
     }
   }
 
-  function addThumb(grid, thumb, full, caption) {
+  let _currentFbKey = null;
+
+  function addThumb(grid, thumb, full, caption, fbKey) {
     const div = document.createElement('div');
     div.style.cssText = 'aspect-ratio:1;overflow:hidden;border-radius:4px;cursor:pointer;background:var(--border)';
     div.innerHTML = `<img src="${thumb}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.display='none'">`;
-    div.querySelector('img').addEventListener('click', () => openLightbox(full, caption));
+    div.querySelector('img').addEventListener('click', () => openLightbox(full, caption, fbKey));
     grid.appendChild(div);
   }
 
-  function openLightbox(src, caption) {
+  function openLightbox(src, caption, fbKey) {
+    _currentFbKey = fbKey || null;
     const lb = document.getElementById('lightbox');
     document.getElementById('lightbox-img').src = src;
     document.getElementById('lightbox-caption').textContent = caption;
+    const delBtn = document.getElementById('lightbox-delete-btn');
+    if (delBtn) delBtn.style.display = fbKey ? 'inline-block' : 'none';
     lb.style.display = 'flex';
     document.body.style.overflow = 'hidden';
   }
   function closeLightbox() {
     document.getElementById('lightbox').style.display = 'none';
     document.body.style.overflow = '';
+    _currentFbKey = null;
+  }
+
+  async function deleteCurrentPhoto() {
+    if (!_currentFbKey) return;
+    const isIt = document.documentElement.lang !== 'en';
+    const msg = isIt ? 'Eliminare questa foto?' : 'Delete this photo?';
+    if (!confirm(msg)) return;
+    try {
+      await fetch(`${FB_URL}/photos/${_currentFbKey}.json`, { method: 'DELETE' });
+      closeLightbox();
+      loadGallery();
+    } catch(e) {
+      alert(isIt ? 'Errore durante l'eliminazione.' : 'Error deleting photo.');
+    }
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
