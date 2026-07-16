@@ -3462,12 +3462,12 @@
   }
 
   async function inviaSegnal() {
-    const nome       = document.getElementById('segNome').value.trim();
-    const stanza     = document.getElementById('segStanza').value.trim();
-    const categoria  = document.getElementById('segCategoria').value;
-    const desc       = document.getElementById('segDescrizione').value.trim();
-    const errEl      = document.getElementById('segError');
-    const lang       = document.documentElement.lang;
+    const nome      = document.getElementById('segNome').value.trim();
+    const stanza    = document.getElementById('segStanza').value.trim();
+    const categoria = document.getElementById('segCategoria').value;
+    const desc      = document.getElementById('segDescrizione').value.trim();
+    const errEl     = document.getElementById('segError');
+    const lang      = document.documentElement.lang;
 
     errEl.style.display = 'none';
 
@@ -3479,20 +3479,12 @@
       return;
     }
 
-    if (EJS_SERVICE === 'INSERISCI_SERVICE_ID') {
-      errEl.textContent = lang === 'en'
-        ? '⚠️ EmailJS not configured yet.'
-        : '⚠️ EmailJS non ancora configurato.';
-      errEl.style.display = 'block';
-      return;
-    }
-
     const btn = document.getElementById('segBtn');
     btn.disabled = true;
     btn.innerHTML = '<span>⏳</span><span>' + (lang === 'en' ? 'Sending…' : 'Invio in corso…') + '</span>';
 
     try {
-      // Upload foto se presente
+      // Upload foto opzionale su Cloudinary
       let photoUrl = '';
       const fotoInput = document.getElementById('segFoto');
       if (fotoInput && fotoInput.files[0]) {
@@ -3509,20 +3501,24 @@
         btn.innerHTML = '<span>⏳</span><span>' + (lang === 'en' ? 'Sending…' : 'Invio in corso…') + '</span>';
       }
 
-      await loadEmailJS();
-      await emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
-        from_name:  nome,
-        room:       stanza || '—',
-        category:   categoria,
-        message:    desc + (photoUrl ? `\n\n📷 Foto allegata: ${photoUrl}` : ''),
-        to_email:   'felician@maunsellinternationalschool.com',
-        reply_to:   'noreply@felician2026.app',
-        sent_at:    new Date().toLocaleString('it-IT')
+      // Salva su Firebase
+      const payload = {
+        nome, stanza: stanza || '—', categoria, desc,
+        photoUrl: photoUrl || null,
+        ts: Date.now(),
+        data: new Date().toLocaleString('it-IT')
+      };
+      const res = await fetch(`${FB_URL}/segnalazioni.json`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
       });
+      if (!res.ok) throw new Error('Firebase error ' + res.status);
+
       document.getElementById('segFormWrap').style.display = 'none';
       document.getElementById('segSuccess').style.display = 'block';
     } catch(e) {
-      errEl.textContent = (lang === 'en' ? 'Error: ' : 'Errore: ') + (e.text || e.message || 'unknown');
+      errEl.textContent = (lang === 'en' ? 'Error: ' : 'Errore: ') + (e.message || 'unknown');
       errEl.style.display = 'block';
     } finally {
       btn.disabled = false;
