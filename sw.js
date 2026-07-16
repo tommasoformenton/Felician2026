@@ -1,5 +1,5 @@
-const CACHE = "felician2026-v2";
-const ASSETS = ["/", "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"];
+const CACHE = "felician2026-v3";
+const ASSETS = ["/Felician2026/", "/Felician2026/manifest.json", "/Felician2026/icons/icon-192.png", "/Felician2026/icons/icon-512.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
