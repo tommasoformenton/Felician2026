@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>📊 Risultati — Re e Reginetta del Prom</title>
+<link rel="icon" href="icons/icon-192.png" />
+<style>
+  :root{
+    --purple-dark:#140824;--purple:#2a1146;--gold:#d4af37;--gold-light:#f0d278;
+    --text:#f4ecff;--text-muted:#b9a8d6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top, var(--purple) 0%, var(--purple-dark) 65%);
+       color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;padding:30px 20px 60px;}
+  h1{text-align:center;font-family:Georgia,serif;font-size:32px;margin:0 0 6px;
+     background:linear-gradient(180deg,var(--gold-light),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{text-align:center;color:var(--text-muted);font-size:14px;margin:0 0 36px;}
+  .cols{display:flex;gap:40px;max-width:1000px;margin:0 auto;flex-wrap:wrap;justify-content:center;}
+  .col{flex:1;min-width:320px;max-width:460px;}
+  .col h2{font-size:20px;text-align:center;margin-bottom:18px;}
+  .row{margin-bottom:16px;}
+  .row-head{display:flex;justify-content:space-between;font-size:15px;margin-bottom:6px;}
+  .row-head .name{font-weight:600;}
+  .row-head .count{color:var(--gold-light);font-weight:700;}
+  .bar-bg{background:rgba(255,255,255,.08);border-radius:999px;height:22px;overflow:hidden;border:1px solid rgba(212,175,55,.25);}
+  .bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:999px;
+             transition:width 1s ease;width:0%;}
+  .leader{position:relative;}
+  .leader .row-head .name::after{content:' 👑';}
+  .empty{color:var(--text-muted);text-align:center;padding:20px;font-size:13px;}
+  .updated{text-align:center;color:var(--text-muted);font-size:11px;margin-top:40px;}
+</style>
+</head>
+<body>
+<h1>👑 Risultati in Diretta 👸</h1>
+<p class="sub">Aggiornamento automatico ogni 3 secondi</p>
+<div class="cols">
+  <div class="col">
+    <h2>👑 Re del Prom</h2>
+    <div id="king"></div>
+  </div>
+  <div class="col">
+    <h2>👸 Reginetta del Prom</h2>
+    <div id="queen"></div>
+  </div>
+</div>
+<p class="updated" id="updated"></p>
+
+<script src="app.js"></script>
+<script>
+function render(el, candidates, votes){
+  const counts = {};
+  candidates.forEach(c => counts[c.id] = 0);
+  votes.forEach(v => { if (counts[v.candidateId] !== undefined) counts[v.candidateId]++; });
+  const total = votes.length;
+  const maxCount = Math.max(1, ...Object.values(counts));
+  const sorted = [...candidates].sort((a,b) => counts[b.id]-counts[a.id]);
+
+  if (sorted.length === 0){
+    el.innerHTML = '<div class="empty">Nessun candidato ancora aggiunto.</div>';
+    return;
+  }
+  el.innerHTML = sorted.map((c,i) => {
+    const n = counts[c.id] || 0;
+    const pct = total ? Math.round(n/total*100) : 0;
+    const widthPct = Math.round(n / maxCount * 100);
+    return `
+      <div class="row ${i===0 && n>0 ? 'leader':''}">
+        <div class="row-head"><span class="name">${c.name}</span><span class="count">${n} voti (${pct}%)</span></div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${widthPct}%"></div></div>
+      </div>`;
+  }).join('');
+}
+
+async function refresh(){
+  const [king, queen, kVotes, qVotes] = await Promise.all([
+    fbGet('candidates/king'),
+    fbGet('candidates/queen'),
+    fbGet('votes/king'),
+    fbGet('votes/queen'),
+  ]);
+  render(document.getElementById('king'), objToArray(king), objToArray(kVotes));
+  render(document.getElementById('queen'), objToArray(queen), objToArray(qVotes));
+  document.getElementById('updated').textContent = 'Ultimo aggiornamento: ' + new Date().toLocaleTimeString('it-IT');
+}
+
+refresh();
+setInterval(refresh, 3000);
+</script>
+</body>
+</html>
