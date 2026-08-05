@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>⚙️ Admin — Re e Reginetta del Prom · Turno 2</title>
+<link rel="icon" href="icons/icon-192.png" />
+<script src="../qrcode.min.js"></script>
+<style>
+  :root{
+    --purple-dark:#140824;--purple:#2a1146;--gold:#d4af37;--gold-light:#f0d278;
+    --text:#f4ecff;--text-muted:#b9a8d6;--danger:#c83c3c;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top, var(--purple) 0%, var(--purple-dark) 65%);
+       color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;padding:24px 16px 60px;}
+  .wrap{max-width:640px;margin:0 auto;}
+  h1{font-family:Georgia,serif;font-size:24px;margin:0 0 24px;text-align:center;
+     background:linear-gradient(180deg,var(--gold-light),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  h2{font-size:16px;border-bottom:1px solid rgba(212,175,55,.3);padding-bottom:8px;margin:32px 0 14px;}
+  .card{background:rgba(255,255,255,.05);border:1px solid rgba(212,175,55,.25);border-radius:14px;padding:16px;margin-bottom:14px;}
+  label{display:flex;align-items:center;justify-content:space-between;font-size:14px;margin-bottom:10px;cursor:pointer;}
+  input[type=text],input[type=password],input[type=url]{
+    width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(212,175,55,.3);
+    background:rgba(255,255,255,.06);color:var(--text);font-size:14px;margin-bottom:8px;}
+  input::placeholder{color:var(--text-muted);}
+  button{cursor:pointer;border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:600;}
+  .btn-gold{background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#2a1146;}
+  .btn-ghost{background:rgba(255,255,255,.08);color:var(--text);}
+  .btn-danger{background:rgba(200,60,60,.2);color:#ff9d9d;border:1px solid rgba(200,60,60,.5);}
+  .switch{position:relative;width:44px;height:24px;background:rgba(255,255,255,.15);border-radius:999px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;position:absolute;}
+  .switch .knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;}
+  .switch input:checked + .knob{transform:translateX(20px);background:var(--gold);}
+  .switch input:checked ~ .track{background:var(--gold);}
+  .candidate-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px;}
+  .candidate-row:last-child{border-bottom:none;}
+  .del-btn{background:none;border:none;color:#ff9d9d;font-size:18px;cursor:pointer;padding:2px 8px;}
+  .add-row{display:flex;gap:8px;margin-top:10px;}
+  .add-row input{margin-bottom:0;}
+  .add-row input[name=name]{flex:2;}
+  .add-row input[name=photo]{flex:3;}
+  .muted{color:var(--text-muted);font-size:12px;}
+  .qr-box{text-align:center;}
+  #qrCanvas{background:#fff;padding:12px;border-radius:12px;margin:12px auto;display:none;}
+  .url-row{display:flex;gap:8px;}
+  .url-row input{flex:1;}
+  #loginScreen{max-width:320px;margin:80px auto;text-align:center;}
+  #loginScreen input{margin-bottom:12px;}
+  #appScreen{display:none;}
+  .toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);
+         background:var(--gold);color:#2a1146;padding:12px 20px;border-radius:999px;font-size:13px;font-weight:600;
+         opacity:0;transition:.25s;z-index:20;pointer-events:none;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .r-row{margin-bottom:14px;}
+  .r-row-head{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;}
+  .r-row-head .n{font-weight:700;}
+  .r-row-head .c{color:var(--text-muted);}
+  .r-row.leader .n::after{content:' 👑';}
+  .r-bar-bg{background:rgba(255,255,255,.08);border-radius:999px;height:16px;overflow:hidden;border:1px solid rgba(212,175,55,.25);}
+  .r-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:999px;transition:width .8s ease;}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <h1>⚙️ Admin</h1>
+  <input type="password" id="pwInput" placeholder="Password admin" onkeydown="if(event.key==='Enter')doLogin()" />
+  <button class="btn-gold" style="width:100%" onclick="doLogin()">Entra</button>
+  <p class="muted" style="margin-top:14px;">La password si imposta nel file <code>admin.html</code> (costante ADMIN_PASSWORD).</p>
+</div>
+
+<div class="wrap" id="appScreen">
+  <h1>⚙️ Pannello Admin — Prom Turno 2</h1>
+
+  <h2>Impostazioni</h2>
+  <div class="card">
+    <label>Votazioni aperte
+      <span class="switch"><input type="checkbox" id="toggleOpen" onchange="saveSettings()"/><span class="knob"></span></span>
+    </label>
+    <label>Risultati visibili agli ospiti (link nella pagina di voto)
+      <span class="switch"><input type="checkbox" id="toggleResults" onchange="saveSettings()"/><span class="knob"></span></span>
+    </label>
+    <p class="muted">Nota: questo controllo è "soft" — chi conosce l'indirizzo di results.html può comunque aprirlo direttamente.</p>
+  </div>
+
+  <h2>👑 Candidati Re</h2>
+  <div class="card">
+    <div id="listKing"></div>
+    <div class="add-row">
+      <input type="text" name="name" id="nameKing" placeholder="Nome candidato" />
+      <input type="url" name="photo" id="photoKing" placeholder="URL foto (opzionale)" />
+      <button class="btn-gold" onclick="addCandidate('king')">+</button>
+    </div>
+  </div>
+
+  <h2>👸 Candidate Reginetta</h2>
+  <div class="card">
+    <div id="listQueen"></div>
+    <div class="add-row">
+      <input type="text" name="name" id="nameQueen" placeholder="Nome candidata" />
+      <input type="url" name="photo" id="photoQueen" placeholder="URL foto (opzionale)" />
+      <button class="btn-gold" onclick="addCandidate('queen')">+</button>
+    </div>
+  </div>
+
+  <h2>📊 Risultati in diretta (solo staff)</h2>
+  <div class="card">
+    <p class="muted" style="margin-bottom:12px">Visibile solo qui, indipendentemente dal toggle "risultati visibili agli ospiti". Il 👑 indica chi è in testa. Aggiornamento automatico ogni 5s.</p>
+    <div style="font-weight:700;margin-bottom:8px">👑 Re</div>
+    <div id="resultsKing"></div>
+    <div style="font-weight:700;margin:16px 0 8px">👸 Reginetta</div>
+    <div id="resultsQueen"></div>
+  </div>
+
+  <h2>🖥️ Manutenzione</h2>
+  <div class="card">
+    <p class="muted">Apri la vista risultati a schermo intero (adatta a proiettore, per la premiazione pubblica):</p>
+    <button class="btn-ghost" onclick="window.open('results.html','_blank')">📊 Apri Risultati Proiettore</button>
+    <hr style="border-color:rgba(255,255,255,.08);margin:16px 0;" />
+    <button class="btn-danger" onclick="resetVotes()">🗑️ Azzera tutti i voti</button>
+  </div>
+
+  <h2>📱 QR Code per l'app di voto</h2>
+  <div class="card qr-box">
+    <div class="url-row">
+      <input type="text" id="qrUrl" />
+      <button class="btn-gold" onclick="genQr()">Genera</button>
+    </div>
+    <canvas id="qrCanvas"></canvas>
+    <div>
+      <button class="btn-ghost" id="dlBtn" style="display:none;" onclick="downloadQr()">⬇️ Scarica PNG</button>
+    </div>
+    <p class="muted">Stampa il QR o proiettalo: gli ospiti lo inquadrano con la fotocamera e arrivano direttamente alla pagina di voto.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+<script>
+// Change this before publishing the event!
+const ADMIN_PASSWORD = 'PROM2026T2';
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+function doLogin(){
+  const v = document.getElementById('pwInput').value;
+  if (v === ADMIN_PASSWORD){
+    sessionStorage.setItem('pv_admin_ok_t2', '1');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').style.display = 'block';
+    initApp();
+  } else {
+    toast('❌ Password errata');
+  }
+}
+if (sessionStorage.getItem('pv_admin_ok_t2') === '1'){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  window.addEventListener('DOMContentLoaded', initApp);
+}
+
+async function initApp(){
+  await loadSettings();
+  await loadCandidates();
+  await loadResults();
+  const defaultUrl = location.href.replace(/admin\.html.*$/, 'index.html');
+  document.getElementById('qrUrl').value = defaultUrl;
+  setInterval(loadResults, 5000);
+}
+
+function renderResults(el, candidates, votes){
+  const counts = {};
+  candidates.forEach(c => counts[c.id] = 0);
+  votes.forEach(v => { if (counts[v.candidateId] !== undefined) counts[v.candidateId]++; });
+  const total = votes.length;
+  const maxCount = Math.max(1, ...Object.values(counts));
+  const sorted = [...candidates].sort((a,b) => counts[b.id]-counts[a.id]);
+  if (sorted.length === 0){ el.innerHTML = '<p class="muted">Nessun candidato ancora.</p>'; return; }
+  el.innerHTML = sorted.map((c,i) => {
+    const n = counts[c.id] || 0;
+    const pct = total ? Math.round(n/total*100) : 0;
+    const widthPct = Math.round(n / maxCount * 100);
+    return `<div class="r-row ${i===0 && n>0 ? 'leader':''}">
+      <div class="r-row-head"><span class="n">${c.name}</span><span class="c">${n} · ${pct}%</span></div>
+      <div class="r-bar-bg"><div class="r-bar-fill" style="width:${widthPct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+async function loadResults(){
+  const [king, queen, kVotes, qVotes] = await Promise.all([
+    fbGet('candidates/king'), fbGet('candidates/queen'),
+    fbGet('votes/king'), fbGet('votes/queen'),
+  ]);
+  renderResults(document.getElementById('resultsKing'), objToArray(king), objToArray(kVotes));
+  renderResults(document.getElementById('resultsQueen'), objToArray(queen), objToArray(qVotes));
+}
+
+async function loadSettings(){
+  const s = (await fbGet('settings')) || {};
+  document.getElementById('toggleOpen').checked = s.votingOpen !== false;
+  document.getElementById('toggleResults').checked = !!s.resultsVisible;
+}
+async function saveSettings(){
+  await fbSet('settings', {
+    votingOpen: document.getElementById('toggleOpen').checked,
+    resultsVisible: document.getElementById('toggleResults').checked,
+  });
+  toast('✅ Impostazioni salvate');
+}
+
+async function loadCandidates(){
+  const [king, queen] = await Promise.all([fbGet('candidates/king'), fbGet('candidates/queen')]);
+  renderList('listKing', 'king', objToArray(king));
+  renderList('listQueen', 'queen', objToArray(queen));
+}
+
+function renderList(elId, cat, list){
+  const el = document.getElementById(elId);
+  if (list.length === 0){ el.innerHTML = '<p class="muted">Nessun candidato ancora.</p>'; return; }
+  el.innerHTML = list.map(c => `
+    <div class="candidate-row">
+      <span>${c.name}</span>
+      <button class="del-btn" onclick="delCandidate('${cat}','${c.id}','${c.name.replace(/'/g,"\\'")}')">✕</button>
+    </div>`).join('');
+}
+
+async function addCandidate(cat){
+  const nameEl = document.getElementById(cat === 'king' ? 'nameKing' : 'nameQueen');
+  const photoEl = document.getElementById(cat === 'king' ? 'photoKing' : 'photoQueen');
+  const name = nameEl.value.trim();
+  if (!name) return;
+  await fbPush(`candidates/${cat}`, { name, photo: photoEl.value.trim() || null });
+  nameEl.value = ''; photoEl.value = '';
+  loadCandidates();
+  loadResults();
+  toast('✅ Candidato aggiunto');
+}
+
+async function delCandidate(cat, id, name){
+  if (!confirm(`Rimuovere "${name}"?`)) return;
+  await fbDelete(`candidates/${cat}/${id}`);
+  loadCandidates();
+  loadResults();
+}
+
+async function resetVotes(){
+  if (!confirm('Sei sicuro di voler azzerare TUTTI i voti? Questa azione non è reversibile.')) return;
+  if (!confirm('Confermi di nuovo: azzerare definitivamente i voti?')) return;
+  await Promise.all([fbDelete('votes/king'), fbDelete('votes/queen')]);
+  toast('🗑️ Voti azzerati');
+  loadResults();
+}
+
+function genQr(){
+  const url = document.getElementById('qrUrl').value.trim();
+  if (!url) return;
+  const canvas = document.getElementById('qrCanvas');
+  canvas.style.display = 'block';
+  QRCode.toCanvas(canvas, url, { width: 260, margin: 2, color: { dark: '#140824', light: '#ffffff' } }, (err) => {
+    if (err) { toast('❌ Errore generazione QR'); return; }
+    document.getElementById('dlBtn').style.display = 'inline-block';
+  });
+}
+function downloadQr(){
+  const canvas = document.getElementById('qrCanvas');
+  const a = document.createElement('a');
+  a.download = 'qr-vota-prom.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+</script>
+</body>
+</html>

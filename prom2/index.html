@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>👑 Vota Re e Reginetta del Prom · Turno 2</title>
+<meta name="theme-color" content="#140824" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<style>
+  :root{
+    --purple-dark:#140824;
+    --purple:#2a1146;
+    --purple-light:#3a1a5c;
+    --gold:#d4af37;
+    --gold-light:#f0d278;
+    --text:#f4ecff;
+    --text-muted:#b9a8d6;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:radial-gradient(ellipse at top, var(--purple) 0%, var(--purple-dark) 65%);
+    color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    padding:24px 16px 60px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .stars{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, #fff 100%, transparent),
+      radial-gradient(1px 1px at 70% 15%, #fff 100%, transparent),
+      radial-gradient(1px 1px at 40% 80%, #fff 100%, transparent),
+      radial-gradient(1px 1px at 85% 60%, #fff 100%, transparent),
+      radial-gradient(1px 1px at 10% 65%, #fff 100%, transparent),
+      radial-gradient(1px 1px at 55% 45%, #fff 100%, transparent);
+    background-repeat:no-repeat;
+  }
+  header{text-align:center;margin-bottom:18px;position:relative;z-index:1;}
+  .crown{font-size:44px;line-height:1;filter:drop-shadow(0 2px 6px rgba(212,175,55,.6));}
+  h1{font-family:Georgia,'Times New Roman',serif;font-size:24px;margin:8px 0 4px;
+     background:linear-gradient(180deg,var(--gold-light),var(--gold));
+     -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--text-muted);font-size:13px;margin:0;}
+
+  .tabs{display:flex;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(212,175,55,.35);
+        border-radius:999px;padding:4px;margin:18px 0;position:relative;z-index:1;}
+  .tab{border:none;background:transparent;color:var(--text-muted);padding:10px 22px;border-radius:999px;
+       font-size:14px;font-weight:600;cursor:pointer;transition:.2s;}
+  .tab.active{background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#2a1146;}
+
+  .banner{max-width:420px;width:100%;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.4);
+          border-radius:14px;padding:14px 16px;font-size:13px;text-align:center;margin-bottom:14px;position:relative;z-index:1;}
+  .banner.closed{background:rgba(200,40,40,.15);border-color:rgba(200,40,40,.45);}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:460px;position:relative;z-index:1;}
+  .card{background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
+        border:1px solid rgba(212,175,55,.25);border-radius:16px;padding:16px 10px;text-align:center;
+        cursor:pointer;transition:transform .15s, border-color .15s;}
+  .card:active{transform:scale(.96);}
+  .card.voted{border-color:var(--gold);box-shadow:0 0 0 2px rgba(212,175,55,.5) inset;}
+  .card.disabled{opacity:.45;cursor:not-allowed;}
+  .avatar{width:64px;height:64px;border-radius:50%;object-fit:cover;margin:0 auto 10px;
+          border:2px solid var(--gold);background:var(--purple-light);}
+  .avatar-fallback{width:64px;height:64px;border-radius:50%;margin:0 auto 10px;
+          border:2px solid var(--gold);background:var(--purple-light);
+          display:flex;align-items:center;justify-content:center;font-size:26px;}
+  .cname{font-size:14px;font-weight:600;margin:0;}
+  .check{color:var(--gold);font-size:12px;margin-top:6px;font-weight:700;}
+
+  .empty{color:var(--text-muted);font-size:13px;text-align:center;padding:30px 0;}
+
+  footer{margin-top:30px;text-align:center;position:relative;z-index:1;}
+  .results-link{color:var(--gold-light);font-size:13px;text-decoration:none;border-bottom:1px dotted var(--gold-light);}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:10;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--purple);border:1px solid var(--gold);border-radius:16px;padding:24px;max-width:320px;width:100%;text-align:center;}
+  .modal h3{margin:0 0 6px;font-size:17px;}
+  .modal p{color:var(--text-muted);font-size:13px;margin:0 0 18px;}
+  .modal-btns{display:flex;gap:10px;}
+  .modal-btns button{flex:1;padding:11px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer;}
+  .btn-confirm{background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#2a1146;}
+  .btn-cancel{background:rgba(255,255,255,.08);color:var(--text);}
+
+  .toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);
+         background:var(--gold);color:#2a1146;padding:12px 20px;border-radius:999px;font-size:13px;font-weight:600;
+         opacity:0;transition:.25s;z-index:20;pointer-events:none;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<header>
+  <div class="crown">👑</div>
+  <h1>Re &amp; Reginetta del Prom</h1>
+  <p class="sub">Turno 2 · Vota il tuo candidato preferito — un voto per categoria</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-cat="king" onclick="switchTab('king')">👑 Re</button>
+  <button class="tab" data-cat="queen" onclick="switchTab('queen')">👸 Reginetta</button>
+</div>
+
+<div id="banner"></div>
+<div class="grid" id="grid"></div>
+
+<footer>
+  <a class="results-link" id="resultsLink" href="results.html" style="display:none;">📊 Guarda i risultati in diretta</a>
+</footer>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">Confermi il voto?</h3>
+    <p id="modalSub"></p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Annulla</button>
+      <button class="btn-confirm" id="modalConfirmBtn">Conferma</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+<script>
+let currentCat = 'king';
+let candidatesCache = { king: [], queen: [] };
+let settings = { votingOpen: true, resultsVisible: false };
+let pendingVote = null;
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+function switchTab(cat){
+  currentCat = cat;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active', b.dataset.cat===cat));
+  renderGrid();
+}
+
+function avatarHtml(c){
+  if (c.photo) return `<img class="avatar" src="${c.photo}" alt="${c.name}" onerror="this.outerHTML='<div class=avatar-fallback>${currentCat==='king'?'🤵':'👰'}</div>'" />`;
+  return `<div class="avatar-fallback">${currentCat==='king'?'🤵':'👰'}</div>`;
+}
+
+function renderGrid(){
+  const grid = document.getElementById('grid');
+  const list = candidatesCache[currentCat] || [];
+  const votedId = localStorage.getItem('pv_voted_' + currentCat + '_t2');
+
+  if (!settings.votingOpen){
+    grid.innerHTML = '';
+    return;
+  }
+  if (list.length === 0){
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1;">Nessun candidato ancora aggiunto per questa categoria.</div>`;
+    return;
+  }
+  grid.innerHTML = list.map(c => `
+    <div class="card ${votedId===c.id?'voted':''} ${votedId && votedId!==c.id?'disabled':''}"
+         onclick="${votedId ? '' : `openModal('${c.id}', ${JSON.stringify(c.name).replace(/"/g,'&quot;')})`}">
+      ${avatarHtml(c)}
+      <p class="cname">${c.name}</p>
+      ${votedId===c.id ? '<div class="check">✓ Hai votato</div>' : ''}
+    </div>
+  `).join('');
+}
+
+function renderBanner(){
+  const el = document.getElementById('banner');
+  if (!settings.votingOpen){
+    el.innerHTML = `<div class="banner closed">🔒 Le votazioni non sono ancora aperte (o sono state chiuse). Torna più tardi!</div>`;
+  } else {
+    el.innerHTML = '';
+  }
+  document.getElementById('resultsLink').style.display = settings.resultsVisible ? 'inline' : 'none';
+}
+
+function openModal(id, name){
+  pendingVote = { id, name };
+  document.getElementById('modalTitle').textContent = 'Confermi il voto?';
+  document.getElementById('modalSub').textContent = `Stai per votare "${name}" come ${currentCat==='king'?'Re':'Reginetta'}. Non potrai cambiare idea.`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(){
+  pendingVote = null;
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+document.getElementById('modalConfirmBtn').onclick = async () => {
+  if (!pendingVote) return;
+  const { id, name } = pendingVote;
+  const cat = currentCat;
+  closeModal();
+  try {
+    await fbPush(`votes/${cat}`, { candidateId: id, device: pvDeviceId(), ts: Date.now() });
+    localStorage.setItem('pv_voted_' + cat + '_t2', id);
+    renderGrid();
+    toast(`✅ Voto registrato per ${name}!`);
+  } catch(e){
+    toast('❌ Errore di rete, riprova.');
+  }
+};
+
+async function loadAll(){
+  const [king, queen, s] = await Promise.all([
+    fbGet('candidates/king'),
+    fbGet('candidates/queen'),
+    fbGet('settings'),
+  ]);
+  candidatesCache.king = objToArray(king);
+  candidatesCache.queen = objToArray(queen);
+  settings = { votingOpen: true, resultsVisible: false, ...(s || {}) };
+  renderBanner();
+  renderGrid();
+}
+
+loadAll();
+setInterval(loadAll, 8000);
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
